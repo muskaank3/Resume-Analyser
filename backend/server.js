@@ -2,6 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
+// create uploads folder if not exists
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
 const pdfParse = require("pdf-parse");
 require("dotenv").config();
 
@@ -15,10 +19,7 @@ const app = express();
 
 app.use(cors());
 
-// ✅ IMPORTANT: uploads folder auto create
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
-}
+
 
 // ================= FILE STORAGE =================
 const storage = multer.diskStorage({
