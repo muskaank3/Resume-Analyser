@@ -15,6 +15,11 @@ const app = express();
 
 app.use(cors());
 
+// ✅ IMPORTANT: uploads folder auto create
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
 // ================= FILE STORAGE =================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -35,6 +40,11 @@ app.get("/", (req, res) => {
 // ================= UPLOAD API =================
 app.post("/upload", upload.single("resume"), async (req, res) => {
   try {
+    // ✅ safety check
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
     const dataBuffer = fs.readFileSync(req.file.path);
     const data = await pdfParse(dataBuffer);
 
@@ -42,24 +52,9 @@ app.post("/upload", upload.single("resume"), async (req, res) => {
 
     // ================= SKILLS =================
     const skillsList = [
-      "react",
-      "node",
-      "mongodb",
-      "javascript",
-      "python",
-      "java",
-      "html",
-      "css",
-      "sql",
-      "electrician",
-      "express",
-      "bootstrap",
-      "tailwind",
-      "figma",
-      "git",
-      "github",
-      "api",
-      "firebase",
+      "react","node","mongodb","javascript","python","java",
+      "html","css","sql","electrician","express","bootstrap",
+      "tailwind","figma","git","github","api","firebase",
     ];
 
     const skills = skillsList.filter((skill) => text.includes(skill));
@@ -115,67 +110,44 @@ app.post("/upload", upload.single("resume"), async (req, res) => {
     const suggestions = [];
 
     if (!sections.summary) {
-      suggestions.push(
-        "Add a strong professional summary at the top to quickly highlight your strengths."
-      );
+      suggestions.push("Add a strong professional summary at the top.");
     }
 
     if (!sections.education) {
-      suggestions.push(
-        "Include a clear Education section with degree, institution, and graduation year."
-      );
+      suggestions.push("Include Education section.");
     }
 
     if (!sections.projects) {
-      suggestions.push(
-        "Add project details with technologies used and measurable outcomes."
-      );
+      suggestions.push("Add project details.");
     }
 
     if (!sections.experience) {
-      suggestions.push(
-        "Mention internships, freelance work, or practical experience to strengthen credibility."
-      );
+      suggestions.push("Mention experience or internships.");
     }
 
     if (!sections.certifications) {
-      suggestions.push(
-        "Adding certifications can improve recruiter trust and profile strength."
-      );
+      suggestions.push("Add certifications.");
     }
 
     if (skills.length < 3) {
-      suggestions.push(
-        "Add more relevant technical skills to better match job requirements."
-      );
+      suggestions.push("Add more technical skills.");
     }
 
     if (!text.includes("linkedin")) {
-      suggestions.push(
-        "Add your LinkedIn profile or portfolio link to improve professional visibility."
-      );
+      suggestions.push("Add LinkedIn profile.");
     }
 
     if (!text.includes("%") && !text.includes("improved")) {
-      suggestions.push(
-        "Use measurable achievements (percentages, impact, results) to make experience stronger."
-      );
+      suggestions.push("Use measurable achievements.");
     }
 
     if (text.length < 500) {
-      suggestions.push(
-        "Your resume feels brief. Add more role-specific achievements and responsibilities."
-      );
+      suggestions.push("Resume is too short, add more details.");
     }
 
     if (suggestions.length < 2) {
-      suggestions.push(
-        "Improve formatting consistency by aligning headings, spacing, and section flow."
-      );
-
-      suggestions.push(
-        "Customize your resume for each job role by matching keywords from the job description."
-      );
+      suggestions.push("Improve formatting consistency.");
+      suggestions.push("Customize resume per job.");
     }
 
     // ================= GOOD POINTS =================
@@ -184,56 +156,50 @@ app.post("/upload", upload.single("resume"), async (req, res) => {
     if (text.length > 500) {
       goodPoints.push({
         title: "Detailed Content",
-        text: "Your resume contains substantial details that help showcase your profile effectively.",
+        text: "Good amount of information present.",
       });
     }
 
     if (skills.length >= 2) {
       goodPoints.push({
         title: "Technical Skills",
-        text: `You have included ${skills.length} relevant skills, which improves your technical profile.`,
+        text: `You have ${skills.length} skills.`,
       });
     }
 
     if (sections.projects) {
       goodPoints.push({
-        title: "Project Showcase",
-        text: "Your project section reflects practical hands-on experience and problem-solving ability.",
+        title: "Projects",
+        text: "Projects are included.",
       });
     }
 
     if (sections.experience) {
       goodPoints.push({
-        title: "Experience Highlight",
-        text: "Your work or internship experience adds credibility to your resume.",
+        title: "Experience",
+        text: "Experience present.",
       });
     }
 
     if (sections.education) {
       goodPoints.push({
-        title: "Education Section",
-        text: "Your educational background is clearly presented for recruiters.",
+        title: "Education",
+        text: "Education included.",
       });
     }
 
     if (text.includes("linkedin") || text.includes("@")) {
       goodPoints.push({
-        title: "Professional Presence",
-        text: "Your contact details and online presence are well included.",
+        title: "Contact Info",
+        text: "Contact details present.",
       });
     }
 
     if (goodPoints.length === 0) {
-      goodPoints.push(
-        {
-          title: "Resume Structure",
-          text: "Your resume has a readable structure that is easy to follow.",
-        },
-        {
-          title: "Essential Details",
-          text: "Basic professional information is included for recruiters.",
-        }
-      );
+      goodPoints.push({
+        title: "Basic Structure",
+        text: "Resume structure is okay.",
+      });
     }
 
     res.json({
@@ -244,9 +210,10 @@ app.post("/upload", upload.single("resume"), async (req, res) => {
       goodPoints,
       fileName: req.file.originalname,
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error");
+    res.status(500).send("Error analyzing resume");
   }
 });
 
