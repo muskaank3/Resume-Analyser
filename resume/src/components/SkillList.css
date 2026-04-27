@@ -1,0 +1,14 @@
+.skill-list span {
+  display: inline-block;
+  margin: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.good {
+  background: #d4edda;
+}
+
+.bad {
+  background: #f8d7da;
+}
