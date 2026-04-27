@@ -76,7 +76,7 @@ const Home = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/upload",
+        "https://resume-backend-cgfh.onrender.com",
         formData
       );
 
