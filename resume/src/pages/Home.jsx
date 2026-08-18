@@ -5,7 +5,7 @@ import "./Home.css";
 import boy1 from "../assets/Boy/boy1.png";
 import loc from "../assets/Location/location.webp";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://resume-backend-cgfh.onrender.com";
 
 const Home = () => {
   const [showLogin, setShowLogin] = useState(false);
